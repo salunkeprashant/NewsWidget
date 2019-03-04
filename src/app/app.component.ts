@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ApiService } from './service/api.service';
 import { environment } from '../environments/environment';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalRef, NgbModalOptions, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
@@ -18,6 +18,8 @@ export class AppComponent {
   filteredArticles: Array<any>;
   newsSources: Array<any>;
   news: any;
+  showIframe: boolean = false;
+  url: any;
 
   constructor(apiService: ApiService, modalService: NgbModal, public sanitizer: DomSanitizer) {
     this.apiService = apiService;
@@ -30,9 +32,20 @@ export class AppComponent {
 
   openmodal(content, news): void {
     this.news = news;
-    this.modalRef = this.modalService.open(content, {
-      size: 'lg'
-    });
+    this.showIframe = true;
+    this.url = this.sanitizer.bypassSecurityTrustResourceUrl(news.url);
+
+    let ngbModalOptions: NgbModalOptions = {
+      backdrop: 'static',
+      keyboard: false
+    };
+
+    this.modalRef = this.modalService.open(content, ngbModalOptions);
+  }
+
+  closeModal(): void {
+    this.showIframe = false;
+    this.modalRef.close();
   }
 
   protected getTopNews() {
