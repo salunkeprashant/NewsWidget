@@ -1,0 +1,43 @@
+<div class="container">
+  <h2>Top Headlines</h2>
+  <div class="input-area">
+    <div class="list-group list-group-horizontal">
+      <a href="#" class="list-group-item active">All</a>
+      <a href="#" class="list-group-item" (click)="changeSource(sourceName)" *ngFor="let sourceName of newsSources">{{sourceName}}</a>
+    </div>
+    <input type="text" placeholder="Search News" class="form-control" name="searchString" [(ngModel)]="searchString" />
+  </div>
+  <div *ngFor="let news of filteredArticles | filter : {'title' : searchString, 'author':searchString};" class="news-widget">
+    <figure class="row clearfix">
+      <figcaption class="col-sm-8">
+        <h4><a href="#" (click)='openmodal(newscontent,news)'>{{news.title}}</a></h4>
+        <p class="post-info">
+          <i>{{news.source.name}}</i>
+          <i>{{news.publishedAt | dateTimedDiff}}</i>
+        </p>
+        <p>{{news.description}}</p>
+      </figcaption>
+      <div class="col-sm-4">
+        <a class="imgwrap" target="_blank" href="{{news.url}}">
+          <img src="{{news.urlToImage}}">
+        </a>
+      </div>
+    </figure>
+  </div>
+</div>
+
+<ng-template #newscontent let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="overflow: hidden; padding-right: .5em;">
+      <h4 class="modal-title">{{news.title}}</h4>
+    </div>
+  </div>
+  <div class="modal-body">
+    <iframe [src]='sanitizer.bypassSecurityTrustResourceUrl(news.url)' width="850" height="450"
+            frameborder="0" style="border:0;" scrolling="yes" allowfullscreen>
+    </iframe>
+  </div>
+</ng-template>
