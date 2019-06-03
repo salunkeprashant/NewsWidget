@@ -17,4 +17,4 @@ Run `ng serve` to start a project on server. Navigate to `http://localhost:4200/
 Done!
 
 # Note
-Clicking news title will open news in `modal dialog` where clicking on image will open it in new page.
+Clicking news title will open news in `modal dialog` where clicking on image will open it in new page. 
