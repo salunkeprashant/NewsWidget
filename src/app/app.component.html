@@ -1,41 +1,37 @@
+<!-- app.component.html -->
 <div class="container">
-  <h2>Top Headlines</h2>
-  <div class="input-area">
-    <div class="list-group list-group-horizontal">
-      <a href="#" class="list-group-item active" (click)="showAllNews()">All</a>
-      <a href="#" class="list-group-item" (click)="changeSource(sourceName)" *ngFor="let sourceName of newsSources">{{sourceName}}</a>
-    </div>
-    <input type="text" placeholder="Search News" class="form-control" name="searchString" [(ngModel)]="searchString" />
+  <header>
+    <h1>Latest News - My Angular App</h1>
+  </header>
+
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading latest news...</p>
   </div>
-  <div *ngFor="let news of filteredArticles | filter : {'title' : searchString , 'author':searchString};" class="news-widget">
-    <figure class="row clearfix">
-      <figcaption class="col-sm-8">
-        <h4><a href="#" (click)='openmodal(newscontent,news)'>{{news.title}}</a></h4>
-        <p class="post-info">
-          <i>{{news.source.name}}</i>
-          <i>{{news.publishedAt | dateTimedDiff}}</i>
-        </p>
-        <p>{{news.description}}</p>
-      </figcaption>
-      <div class="col-sm-4">
-        <a class="imgwrap" target="_blank" href="{{news.url}}">
-          <img src="{{news.urlToImage}}">
-        </a>
+
+  <div *ngIf="errorMessage" class="error">
+    <p>{{ errorMessage }}</p>
+  </div>
+
+  <div *ngIf="!loading && !errorMessage" class="news-grid">
+    <article *ngFor="let article of articles" class="news-card">
+      <div class="image-container">
+        <img [src]="article.urlToImage || 'assets/placeholder.jpg'"
+             [alt]="article.title"
+             (error)="handleImageError($event)">
       </div>
-    </figure>
+      <div class="content">
+        <div class="source-date">
+          <span class="source">{{ article.source.name }}</span>
+          <span class="date">{{ article.publishedAt | date:'medium' }}</span>
+        </div>
+        <h2>{{ article.title }}</h2>
+        <p class="description">{{ article.description }}</p>
+        <div class="author" *ngIf="article.author">
+          <span>By {{ article.author }}</span>
+        </div>
+        <a [href]="article.url" target="_blank" class="read-more">Read More</a>
+      </div>
+    </article>
   </div>
 </div>
-
-<ng-template #newscontent>
-  <div class="modal-header">
-    <button type="button" class="close" aria-label="Close" (click)="closeModal()">
-      <span aria-hidden="true">&times;</span>
-    </button>
-    <div style="overflow: hidden; padding-right: .5em;">
-      <h4 class="modal-title">{{news.title}}</h4>
-    </div>
-  </div>
-  <div class="modal-body" ng-if="showIframe">
-    <iframe id="news-iframe" [src]='url' frameborder="0" allowfullscreen></iframe>
-  </div>
-</ng-template>

@@ -1,66 +1,76 @@
-import { Component } from '@angular/core';
-import { ApiService } from './service/api.service';
-import { environment } from '../environments/environment';
-import { NgbModal, NgbModalRef, NgbModalOptions, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
-import { DomSanitizer } from '@angular/platform-browser';
+// app.component.ts
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
+import { DatePipe } from '@angular/common';
+
+interface Source {
+  id: string | null;
+  name: string;
+}
+
+interface Article {
+  source: Source;
+  author: string | null;
+  title: string;
+  description: string;
+  url: string;
+  urlToImage: string;
+  publishedAt: string;
+  content: string;
+}
+
+interface NewsResponse {
+  status: string;
+  totalResults: number;
+  articles: Article[];
+}
 
 @Component({
   selector: 'app-root',
+  standalone: true,
+  imports: [CommonModule, HttpClientModule, DatePipe],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
-  apiService: ApiService;
-  modalService: NgbModal;
-  modalRef: NgbModalRef;
+export class AppComponent implements OnInit {
+  articles: Article[] = [];
+  loading: boolean = true;
+  errorMessage: string = '';
 
-  newsArticles: Array<any>;
-  filteredArticles: Array<any>;
-  newsSources: Array<any>;
-  news: any;
-  showIframe: boolean = false;
-  url: any;
+  private apiUrl = 'https://newsapi.org/v2/top-headlines?language=en&apiKey=d948c11e91b04de9bbcd5bb0065a395c';
 
-  constructor(apiService: ApiService, modalService: NgbModal, public sanitizer: DomSanitizer) {
-    this.apiService = apiService;
-    this.modalService = modalService;
+  constructor(private http: HttpClient) {}
+
+  ngOnInit(): void {
+    this.fetchNews();
   }
 
-  ngOnInit() {
-    this.getTopNews();
-  }
-
-  openmodal(content, news): void {
-    this.news = news;
-    this.showIframe = true;
-    this.url = this.sanitizer.bypassSecurityTrustResourceUrl(news.url);
-
-    let ngbModalOptions: NgbModalOptions = {
-      backdrop: 'static',
-      keyboard: false
-    };
-
-    this.modalRef = this.modalService.open(content, ngbModalOptions);
-  }
-
-  closeModal(): void {
-    this.showIframe = false;
-    this.modalRef.close();
-  }
-
-  protected getTopNews() {
-    var topHeadlineUrl = `top-headlines?language=${environment.languageKey}&apiKey=${environment.apiKey}`;
-    this.apiService.get(topHeadlineUrl).subscribe(result => {
-      this.newsArticles = this.filteredArticles = result.articles;
-      this.newsSources = this.newsArticles.map(x => x.source.name).filter((value, index, self) => self.indexOf(value) === index);;
+  private fetchNews(): void {
+    this.http.get<NewsResponse>(this.apiUrl).pipe(
+      catchError(error => {
+        this.errorMessage = 'Failed to load news data.';
+        this.loading = false;
+        return throwError(() => new Error(error));
+      })
+    ).subscribe({
+      next: (data) => {
+        this.articles = data.articles;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error fetching news:', error);
+        this.errorMessage = 'Failed to load news data.';
+        this.loading = false;
+      }
     });
   }
 
-  public showAllNews() {
-    this.filteredArticles = this.newsArticles;
-  }
-
-  public changeSource(sourceName: string) {
-    this.filteredArticles = this.newsArticles.filter(x => x.source.name == sourceName);
+  handleImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src = 'assets/placeholder.jpg';
   }
 }
