@@ -57,3 +57,31 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Docker
+
+You can build and run this application inside a Docker container. The repository includes a `Dockerfile` (multi-stage) that builds the app with Node and serves it with `nginx`.
+
+Build the image with Docker:
+
+```powershell
+docker build -t newswidget:local .
+```
+
+Run the container (maps container port 80 to host port 8080):
+
+```powershell
+docker run --rm -p 8080:80 newswidget:local
+```
+
+Alternatively use Docker Compose:
+
+```powershell
+docker-compose up --build -d
+```
+
+Then open your browser at `http://localhost:8080/`.
+
+Notes:
+- Ensure Docker Desktop (or another Docker runtime) is installed and running.
+- The build uses `npm ci` during the Docker build, which expects `package-lock.json` to be present for reproducible installs. If you don't have one, the image will still build but npm will install using `package.json` versions.

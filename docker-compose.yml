@@ -1,0 +1,8 @@
+version: '3.8'
+services:
+  newswidget:
+    build: .
+    image: newswidget:local
+    ports:
+      - "5000:80"
+    restart: unless-stopped
